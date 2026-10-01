@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>[hidden]{display:none!important}img{max-width:100%}body{margin:0}</style>
+</head>
+<body>
+<title>Pedido de Retoque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: una sola columna tipo hoja de contactos; cada cambio es un "cuadro" marcado con lápiz graso rojo; barra fija abajo para terminar. */
+:root{
+  --paper:#ECEEF1; --sheet:#FBFBFC; --ink:#15171B; --muted:#5B626C; --line:#D3D8DE;
+  --pencil:#D3242C; --pencil-soft:rgba(211,36,44,.08); --ok:#1F7A4D; --focus:#2D5BD7;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#111214; --sheet:#1A1C1F; --ink:#ECEDEF; --muted:#9BA1A9; --line:#2D3035;
+  --pencil:#FF4F55; --pencil-soft:rgba(255,79,85,.10); --ok:#4CC28A; --focus:#7FA2FF; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#111214; --sheet:#1A1C1F; --ink:#ECEDEF; --muted:#9BA1A9; --line:#2D3035;
+  --pencil:#FF4F55; --pencil-soft:rgba(255,79,85,.10); --ok:#4CC28A; --focus:#7FA2FF; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font:16px/1.5 var(--body);padding-inline:16px;padding-block:0 120px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1,h2{font-family:var(--display);text-wrap:balance;margin:0}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+/* Cabecera */
+header{padding-block:32px 4px;display:flex;flex-direction:column;gap:10px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--pencil)}
+h1{font-size:clamp(34px,7vw,52px);font-weight:800;line-height:1;letter-spacing:-.02em}
+.lede{color:var(--muted);max-width:56ch;margin:0}
+
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.steps li{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.35;color:var(--muted)}
+.steps b{display:block;color:var(--ink);font-weight:600}
+.steps .n{flex:none;font:500 13px/26px var(--mono);width:28px;height:26px;text-align:center;color:var(--pencil);position:relative}
+.steps .n::before{content:"";position:absolute;inset:0;border:2px solid var(--pencil);border-radius:50%;transform:rotate(-8deg)}
+@media (max-width:600px){.steps{grid-template-columns:1fr}}
+
+/* Datos del cliente */
+.who{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.who{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+label.lbl,.lbl{font-size:13px;font-weight:600;letter-spacing:.01em}
+.hint{font-size:13px;color:var(--muted)}
+input[type=text],textarea{width:100%;background:var(--sheet);border:1.5px solid var(--line);border-radius:8px;padding:11px 12px;min-height:46px}
+textarea{resize:vertical;min-height:84px;line-height:1.45}
+input.mono{font-family:var(--mono);font-size:15px;letter-spacing:.02em}
+input:focus,textarea:focus{border-color:var(--focus);outline:none}
+.err input,.err textarea{border-color:var(--pencil)}
+.errmsg{font-size:13px;color:var(--pencil);font-weight:600}
+
+/* Ejemplo */
+details.ejemplo{border:1.5px dashed var(--line);border-radius:var(--r);background:transparent}
+details.ejemplo summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:15px;list-style:none;display:flex;gap:8px;align-items:center}
+details.ejemplo summary::-webkit-details-marker{display:none}
+details.ejemplo summary::before{content:"+";font:500 18px/1 var(--mono);color:var(--pencil);width:14px}
+details.ejemplo[open] summary::before{content:"–"}
+.ej-body{padding:0 16px 16px;display:grid;grid-template-columns:1fr 150px;gap:14px;font-size:14px}
+.ej-body dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}
+.ej-body dt{color:var(--muted)} .ej-body dd{margin:0}
+.ej-body .mono{font-family:var(--mono)}
+.ej-ref{border-radius:8px;overflow:hidden;border:1px solid var(--line);align-self:start}
+.ej-ref svg{display:block;width:100%;height:auto}
+.ej-tag{font:500 11px/1 var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+@media (max-width:520px){.ej-body{grid-template-columns:1fr}.ej-ref{max-width:180px}}
+
+/* Tarjetas de pedido */
+.list{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--sheet);border:1.5px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:16px;transition:border-color .15s}
+.card.active{border-color:color-mix(in srgb,var(--pencil) 45%,var(--line))}
+.card-head{display:flex;align-items:center;gap:12px}
+.frame{font:500 13px/1 var(--mono);color:var(--pencil);position:relative;padding:9px 12px;flex:none}
+.frame::before{content:"";position:absolute;inset:0;border:2px solid var(--pencil);border-radius:50%;transform:rotate(-6deg)}
+.card-head h2{font-size:18px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-head h2 .ph{color:var(--muted);font-weight:500}
+.tools{display:flex;gap:2px;flex:none}
+@media (max-width:560px){.card-head{flex-wrap:wrap}.card-head h2{flex:1 1 calc(100% - 70px)}.tools{flex:1 1 100%;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px}.card{padding:16px}}
+.mini{background:none;border:0;color:var(--muted);font-size:14px;padding:8px 6px;cursor:pointer;border-radius:6px;white-space:nowrap}
+.mini:hover{color:var(--ink);background:var(--pencil-soft)}
+.mini.danger.armed{color:var(--pencil);font-weight:600}
+
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:620px){.grid2{grid-template-columns:1fr}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--line);background:transparent;border-radius:999px;padding:7px 13px;font-size:14px;cursor:pointer;line-height:1.2}
+.chip[aria-pressed="true"]{border-color:var(--pencil);background:var(--pencil-soft);color:var(--pencil);font-weight:600}
+
+/* Zona de referencia */
+.drop{border:2px dashed var(--line);border-radius:var(--r);min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:18px;cursor:pointer;background:transparent;width:100%;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--pencil);background:var(--pencil-soft)}
+.drop svg{width:34px;height:34px;color:var(--pencil)}
+.drop .big{font-weight:600;font-size:16px}
+.drop .small{font-size:13px;color:var(--muted);max-width:28ch}
+.refbox{display:flex;flex-direction:column;gap:8px}
+.thumb{position:relative;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--line);background:var(--paper);display:flex;justify-content:center}
+.thumb img{display:block;max-height:260px;width:auto;max-width:100%;object-fit:contain}
+.thumb-actions{display:flex;gap:4px;justify-content:flex-end}
+.busy{font-size:13px;color:var(--muted)}
+.hidden-file{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+
+.add{border:2px dashed var(--line);background:transparent;border-radius:var(--r);padding:18px;font-weight:600;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.add:hover{border-color:var(--pencil);color:var(--pencil)}
+.add span{font:500 20px/1 var(--mono);color:var(--pencil)}
+
+/* Barra fija */
+.bar{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--sheet) 92%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+.bar-in{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.count{flex:1;min-width:0;font-size:14px;color:var(--muted)}
+.count b{color:var(--ink);font:500 15px var(--mono)}
+.saved{display:block;font-size:12px}
+.primary{background:var(--pencil);color:#fff;border:0;border-radius:8px;padding:13px 20px;font-weight:600;font-size:16px;cursor:pointer;white-space:nowrap}
+.primary:hover{filter:brightness(1.07)}
+.primary[disabled]{opacity:.6;cursor:progress}
+.ghost{background:transparent;border:1.5px solid var(--line);border-radius:8px;padding:12px 18px;font-weight:600;cursor:pointer}
+.ghost:hover{border-color:var(--ink)}
+
+/* Panel final */
+.overlay{position:fixed;inset:0;background:rgba(10,11,13,.55);display:flex;align-items:flex-end;justify-content:center;padding:16px;z-index:10}
+@media (min-width:620px){.overlay{align-items:center}}
+.panel{background:var(--sheet);border-radius:14px;padding:24px;max-width:460px;width:100%;display:flex;flex-direction:column;gap:14px;max-height:90vh;overflow:auto}
+.panel h2{font-size:26px;font-weight:800}
+.panel p{margin:0;color:var(--muted)}
+.panel .fname{font:500 13px var(--mono);color:var(--ink);background:var(--paper);padding:8px 10px;border-radius:6px;overflow-wrap:anywhere}
+.panel .actions{display:flex;flex-direction:column;gap:10px}
+.panel .actions button{width:100%}
+.contact{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.contact code{font:500 14px var(--mono);user-select:all;color:var(--ink)}
+.msg{font-size:14px;font-weight:600}
+.msg.good{color:var(--ok)} .msg.bad{color:var(--pencil)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Fotos · cambios · referencias</span>
+    <h1>Pedido de retoque</h1>
+    <p class="lede">Cuéntanos qué quieres cambiar en tus fotos. Una tarjeta por cada cambio. Al terminar se arma una planilla con todo ordenado para enviarla.</p>
+  </header>
+
+  <ol class="steps" aria-label="Cómo llenarlo">
+    <li><span class="n">1</span><span><b>Nombre de la foto</b>Está debajo de cada foto en la galería.</span></li>
+    <li><span class="n">2</span><span><b>Qué cambiar</b>Elige el tipo y descríbelo con tus palabras.</span></li>
+    <li><span class="n">3</span><span><b>Referencia</b>Si tienes una imagen de ejemplo, súbela o pégala.</span></li>
+  </ol>
+
+  <section class="who" aria-label="Tus datos">
+    <div class="field"><label class="lbl" for="cliente">Tu nombre</label><input type="text" id="cliente" autocomplete="name" placeholder="Ej: Camila Rojas"></div>
+    <div class="field"><label class="lbl" for="sesion">Sesión o evento</label><input type="text" id="sesion" placeholder="Ej: Matrimonio 14 de septiembre"></div>
+  </section>
+
+  <details class="ejemplo">
+    <summary>Ver un ejemplo de cómo llenarlo</summary>
+    <div class="ej-body">
+      <dl>
+        <dt>Foto</dt><dd class="mono">IMG_4521</dd>
+        <dt>Tipo</dt><dd>Color de ropa</dd>
+        <dt>Cambio</dt><dd>Cambiar la camisa del novio de blanco a azul marino, como en la referencia. Mantener las arrugas naturales.</dd>
+        <dt>Referencia</dt><dd>Imagen de la tela azul (subida desde el celular)</dd>
+      </dl>
+      <figure class="ej-ref" style="margin:0">
+        <svg viewBox="0 0 150 120" role="img" aria-label="Ejemplo de referencia: tela azul marino">
+          <rect width="150" height="120" fill="#1E2C4F"/>
+          <path d="M0 30 Q40 22 75 34 T150 28" stroke="#2C3D66" stroke-width="10" fill="none"/>
+          <path d="M0 70 Q50 60 90 76 T150 66" stroke="#16213C" stroke-width="12" fill="none"/>
+          <path d="M0 102 Q45 94 80 106 T150 98" stroke="#2A3A62" stroke-width="8" fill="none"/>
+        </svg>
+      </figure>
+      <span class="ej-tag">Ejemplo · no se incluye en tu pedido</span>
+    </div>
+  </details>
+
+  <section class="list" id="list" aria-label="Cambios pedidos"></section>
+  <button class="add" id="addBtn" type="button"><span>+</span> Agregar otra foto</button>
+</div>
+
+<div class="bar">
+  <div class="bar-in">
+    <div class="count"><b id="nCount">0</b> <span id="nLabel">cambios</span><span class="saved" id="savedNote"></span></div>
+    <button class="primary" id="finishBtn" type="button">Terminar pedido</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="pTitle">
+    <h2 id="pTitle">Tu pedido está listo</h2>
+    <p id="pSummary"></p>
+    <div class="fname" id="pFile"></div>
+    <p>Descarga la planilla y envíasela a tu fotógrafo por WhatsApp o correo.</p>
+    <div class="contact" id="pContact" hidden></div>
+    <div class="actions">
+      <button class="primary" id="shareBtn" type="button" hidden>Enviar (WhatsApp, correo…)</button>
+      <button class="primary" id="dlBtn" type="button">Descargar planilla Excel</button>
+      <div class="msg" id="pMsg" role="status"></div>
+      <button class="ghost" id="backBtn" type="button">Volver y seguir editando</button>
+      <button class="mini danger" id="resetBtn" type="button">Empezar un pedido nuevo</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
+<script>
+/* ===== Configuración del fotógrafo (opcional) =====
+   Si escribes tu contacto aquí, aparece al final para que el cliente sepa a dónde enviar. */
+const CONFIG = { contacto: "" }; // ej: "+56 9 1234 5678" o "fotos@tuestudio.cl"
+
+const TIPOS = ["Color de ropa","Piel","Pelo","Quitar algo","Fondo","Luz y color","Otro"];
+const KEY = "pedido-retoque-v1";
+const $ = s => document.querySelector(s);
+const uid = () => Math.random().toString(36).slice(2,9);
+const blank = (archivo="") => ({id:uid(), archivo, tipos:[], detalle:"", ref:null, refNota:""});
+
+let state = {cliente:"", sesion:"", items:[blank()]};
+let activeId = null;
+let built = null; // {blob, filename}
+
+/* ---------- Borrador local ---------- */
+function load(){
+  try{ const s = JSON.parse(localStorage.getItem(KEY)||"null"); if(s && Array.isArray(s.items) && s.items.length) state = s; }catch(e){}
+}
+let saveT;
+function save(){
+  clearTimeout(saveT);
+  saveT = setTimeout(()=>{
+    let note = "Borrador guardado en este dispositivo";
+    try{ localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch(e){
+      try{ localStorage.setItem(KEY, JSON.stringify({...state, items: state.items.map(i=>({...i, ref:null}))})); note = "Borrador guardado (sin imágenes)"; }
+      catch(e2){ note = ""; }
+    }
+    $("#savedNote").textContent = note;
+  }, 400);
+}
+
+/* ---------- Render ---------- */
+const icoImg = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const isTouch = matchMedia("(pointer:coarse)").matches;
+
+function cardHTML(it, i){
+  const n = String(i+1).padStart(2,"0");
+  const title = it.archivo ? esc(it.archivo) : '<span class="ph">Foto sin nombre todavía</span>';
+  const chips = TIPOS.map(t => `<button type="button" class="chip" data-act="tipo" data-t="${esc(t)}" aria-pressed="${it.tipos.includes(t)}">${t}</button>`).join("");
+  const ref = it.ref
+    ? `<div class="thumb"><img src="${it.ref.data}" alt="Referencia para ${esc(it.archivo||"esta foto")}"></div>
+       <div class="thumb-actions"><button type="button" class="mini" data-act="pick">Cambiar imagen</button><button type="button" class="mini" data-act="rmref">Quitar</button></div>`
+    : `<button type="button" class="drop" data-act="pick" data-drop>
+         ${icoImg}
+         <span class="big">Agregar imagen de referencia</span>
+         <span class="small">${isTouch ? "Elige una foto o captura de tu galería" : "Haz clic para elegir, arrastra una imagen aquí o pégala con Ctrl+V"}</span>
+       </button>`;
+  return `<article class="card${it.id===activeId?" active":""}" data-id="${it.id}">
+    <div class="card-head">
+      <span class="frame" aria-hidden="true">${n}</span>
+      <h2>${title}</h2>
+      <div class="tools">
+        <button type="button" class="mini" data-act="dup" title="Pedir otro cambio en esta misma foto">+ Otro cambio en esta foto</button>
+        <button type="button" class="mini danger" data-act="del">Eliminar</button>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="col">
+        <div class="field" data-f="archivo">
+          <label class="lbl" for="a-${it.id}">Nombre de la foto</label>
+          <input type="text" class="mono" id="a-${it.id}" data-k="archivo" value="${esc(it.archivo)}" placeholder="Ej: IMG_4521" autocapitalize="characters" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="field">
+          <span class="lbl" id="t-${it.id}">Tipo de cambio</span>
+          <div class="chips" role="group" aria-labelledby="t-${it.id}">${chips}</div>
+        </div>
+        <div class="field" data-f="detalle">
+          <label class="lbl" for="d-${it.id}">¿Qué quieres cambiar?</label>
+          <textarea id="d-${it.id}" data-k="detalle" placeholder="Ej: cambiar la camisa de blanco a azul marino, como en la referencia">${esc(it.detalle)}</textarea>
+        </div>
+      </div>
+      <div class="col">
+        <div class="field">
+          <span class="lbl">Referencia <span class="hint">(opcional)</span></span>
+          <div class="refbox">${ref}</div>
+          <span class="busy" data-busy hidden>Cargando imagen…</span>
+          <input type="file" accept="image/*" class="hidden-file" data-file tabindex="-1" aria-hidden="true">
+        </div>
+        <div class="field">
+          <label class="lbl" for="r-${it.id}">Comentario o link de la referencia <span class="hint">(opcional)</span></label>
+          <input type="text" id="r-${it.id}" data-k="refNota" value="${esc(it.refNota)}" placeholder="Ej: el tono de pelo de esta foto, o un link de Pinterest">
+        </div>
+      </div>
+    </div>
+  </article>`;
+}
+
+function render(){
+  $("#list").innerHTML = state.items.map(cardHTML).join("");
+  updateCount();
+}
+function updateCount(){
+  const n = state.items.filter(filled).length;
+  $("#nCount").textContent = n;
+  $("#nLabel").textContent = n===1 ? "cambio" : "cambios";
+}
+const filled = it => it.archivo.trim() || it.detalle.trim() || it.ref || it.tipos.length || it.refNota.trim();
+const itemOf = el => { const c = el.closest(".card"); return c && state.items.find(i=>i.id===c.dataset.id); };
+function setActive(id){
+  if(activeId===id) return; activeId = id;
+  document.querySelectorAll(".card").forEach(c=>c.classList.toggle("active", c.dataset.id===id));
+}
+
+/* ---------- Imágenes ---------- */
+function loadImage(file){
+  return new Promise((res, rej)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const max = 1400, s = Math.min(1, max/Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.max(1, Math.round(img.naturalWidth*s)), h = Math.max(1, Math.round(img.naturalHeight*s));
+      const c = document.createElement("canvas"); c.width=w; c.height=h;
+      const x = c.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,w,h); x.drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      res({data:c.toDataURL("image/jpeg",0.85), w, h});
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error("formato")); };
+    img.src = url;
+  });
+}
+async function attach(it, file){
+  const card = document.querySelector(`.card[data-id="${it.id}"]`);
+  const busy = card && card.querySelector("[data-busy]");
+  if(busy){ busy.hidden=false; busy.textContent="Cargando imagen…"; }
+  try{
+    it.ref = await loadImage(file);
+    save(); render();
+  }catch(e){
+    if(busy){ busy.hidden=false; busy.textContent="Esa imagen no se pudo abrir. Prueba con una captura de pantalla o un JPG."; }
+  }
+}
+
+/* ---------- Eventos ---------- */
+const list = $("#list");
+list.addEventListener("input", e=>{
+  const k = e.target.dataset.k; if(!k) return;
+  const it = itemOf(e.target); it[k] = e.target.value;
+  if(k==="archivo"){ const h = e.target.closest(".card").querySelector("h2"); h.innerHTML = it.archivo ? esc(it.archivo) : '<span class="ph">Foto sin nombre todavía</span>'; }
+  const f = e.target.closest(".field"); if(f && f.classList.contains("err")){ f.classList.remove("err"); f.querySelector(".errmsg")?.remove(); }
+  updateCount(); save();
+});
+list.addEventListener("focusin", e=>{ const c=e.target.closest(".card"); if(c) setActive(c.dataset.id); });
+list.addEventListener("pointerdown", e=>{ const c=e.target.closest(".card"); if(c) setActive(c.dataset.id); });
+list.addEventListener("click", e=>{
+  const b = e.target.closest("[data-act]"); if(!b) return;
+  const it = itemOf(b); const idx = state.items.indexOf(it);
+  switch(b.dataset.act){
+    case "tipo": {
+      const t=b.dataset.t; it.tipos = it.tipos.includes(t) ? it.tipos.filter(x=>x!==t) : [...it.tipos, t];
+      b.setAttribute("aria-pressed", it.tipos.includes(t)); updateCount(); save(); break; }
+    case "pick": b.closest(".card").querySelector("[data-file]").click(); break;
+    case "rmref": it.ref=null; save(); render(); break;
+    case "dup": {
+      const n = blank(it.archivo); state.items.splice(idx+1,0,n); activeId=n.id; save(); render();
+      document.getElementById("d-"+n.id)?.focus(); break; }
+    case "del": {
+      if(!b.classList.contains("armed")){
+        b.classList.add("armed"); b.textContent="¿Eliminar? Toca de nuevo";
+        setTimeout(()=>{ if(b.isConnected){ b.classList.remove("armed"); b.textContent="Eliminar"; } }, 3500);
+        return; }
+      state.items.splice(idx,1); if(!state.items.length) state.items.push(blank()); save(); render(); break; }
+  }
+});
+list.addEventListener("change", e=>{
+  if(!e.target.matches("[data-file]")) return;
+  const f = e.target.files && e.target.files[0]; if(f) attach(itemOf(e.target), f); e.target.value="";
+});
+list.addEventListener("dragover", e=>{ const d=e.target.closest("[data-drop]"); if(d){ e.preventDefault(); d.classList.add("over"); } });
+list.addEventListener("dragleave", e=>{ const d=e.target.closest("[data-drop]"); if(d) d.classList.remove("over"); });
+list.addEventListener("drop", e=>{
+  const c = e.target.closest(".card"); if(!c) return; e.preventDefault();
+  const f = [...(e.dataTransfer?.files||[])].find(f=>f.type.startsWith("image/")); if(f) attach(itemOf(c), f);
+});
+document.addEventListener("dragover", e=>e.preventDefault());
+document.addEventListener("drop", e=>{ if(!e.target.closest(".card")) e.preventDefault(); });
+
+// Pegar una imagen (Ctrl+V) en la tarjeta activa
+document.addEventListener("paste", e=>{
+  const f = [...(e.clipboardData?.files||[])].find(f=>f.type.startsWith("image/"));
+  if(!f) return;
+  e.preventDefault();
+  let it = state.items.find(i=>i.id===activeId) || state.items[state.items.length-1];
+  attach(it, f);
+});
+
+$("#addBtn").addEventListener("click", ()=>{
+  const n = blank(); state.items.push(n); activeId=n.id; save(); render();
+  document.getElementById("a-"+n.id)?.focus();
+});
+["cliente","sesion"].forEach(k=>{
+  const el = document.getElementById(k);
+  el.addEventListener("input", ()=>{ state[k]=el.value; save(); });
+});
+
+/* ---------- Validar ---------- */
+function validate(){
+  document.querySelectorAll(".field.err").forEach(f=>{ f.classList.remove("err"); f.querySelector(".errmsg")?.remove(); });
+  const items = state.items.filter(filled);
+  let first = null;
+  const mark = (id, f, msg)=>{
+    const fld = document.querySelector(`.card[data-id="${id}"] [data-f="${f}"]`);
+    if(!fld) return; fld.classList.add("err");
+    const m = document.createElement("span"); m.className="errmsg"; m.textContent=msg; fld.appendChild(m);
+    first = first || fld;
+  };
+  items.forEach(it=>{
+    if(!it.archivo.trim()) mark(it.id,"archivo","Falta el nombre de la foto");
+    if(!it.detalle.trim() && !it.tipos.length) mark(it.id,"detalle","Cuenta qué quieres cambiar");
+  });
+  if(!items.length){ const it=state.items[0]; mark(it.id,"archivo","Agrega al menos una foto"); }
+  if(first){ first.scrollIntoView({behavior:"smooth",block:"center"}); first.querySelector("input,textarea")?.focus({preventScroll:true}); return null; }
+  return items;
+}
+
+/* ---------- Excel ---------- */
+const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+const EMU = 9525;
+async function buildWorkbook(items){
+  const wb = new ExcelJS.Workbook(); wb.creator = "Pedido de retoque";
+  const ws = wb.addWorksheet("Pedido", {
+    views:[{state:"frozen", ySplit:4}],
+    pageSetup:{orientation:"landscape", fitToPage:true, fitToWidth:1, fitToHeight:0, paperSize:9, margins:{left:.4,right:.4,top:.5,bottom:.5,header:.2,footer:.2}}
+  });
+  const REFW = 36, refPx = Math.floor(REFW*7+5), PAD = 8, MAXH = 240;
+  ws.columns = [{width:6},{width:22},{width:20},{width:46},{width:REFW},{width:30},{width:14}];
+  const line = {style:"thin", color:{argb:"FFD3D8DE"}};
+  const border = {top:line,left:line,bottom:line,right:line};
+
+  ws.mergeCells("A1:G1");
+  ws.getCell("A1").value = "Pedido de retoque";
+  ws.getCell("A1").font = {bold:true, size:18, color:{argb:"FF15171B"}};
+  ws.getRow(1).height = 30;
+  ws.mergeCells("A2:G2");
+  const fecha = new Date().toLocaleDateString("es-CL",{day:"2-digit",month:"2-digit",year:"numeric"});
+  const fotos = new Set(items.map(i=>i.archivo.trim().toUpperCase())).size;
+  ws.getCell("A2").value = [
+    "Cliente: " + (state.cliente.trim() || "—"),
+    "Sesión: " + (state.sesion.trim() || "—"),
+    "Fecha: " + fecha,
+    `${items.length} ${items.length===1?"cambio":"cambios"} en ${fotos} ${fotos===1?"foto":"fotos"}`
+  ].join("     ·     ");
+  ws.getCell("A2").font = {size:11, color:{argb:"FF5B626C"}};
+
+  const head = ws.getRow(4);
+  head.values = ["N°","Foto (archivo)","Tipo de cambio","Qué quiere cambiar","Referencia","Comentario / link referencia","Estado"];
+  head.height = 24;
+  head.eachCell(c=>{
+    c.font = {bold:true, color:{argb:"FFFFFFFF"}};
+    c.fill = {type:"pattern", pattern:"solid", fgColor:{argb:"FF15171B"}};
+    c.alignment = {vertical:"middle", horizontal:"left"};
+    c.border = border;
+  });
+  ws.autoFilter = "A4:G4";
+
+  items.forEach((it, i)=>{
+    const r = 5 + i;
+    const row = ws.getRow(r);
+    const nota = it.refNota.trim();
+    const isUrl = /^https?:\/\/\S+$/i.test(nota);
+    row.values = [i+1, it.archivo.trim(), it.tipos.join(", "), it.detalle.trim(), it.ref ? "" : "—", isUrl ? {text:nota, hyperlink:nota} : nota, "Pendiente"];
+    row.eachCell({includeEmpty:true}, (c, col)=>{
+      if(col>7) return;
+      c.alignment = {vertical:"top", horizontal: col===1 ? "center" : "left", wrapText:true};
+      c.border = border;
+    });
+    row.getCell(2).font = {name:"Consolas", bold:true};
+    if(isUrl) row.getCell(6).font = {color:{argb:"FF2D5BD7"}, underline:true};
+    row.getCell(7).dataValidation = {type:"list", allowBlank:true, formulae:['"Pendiente,En proceso,Listo,Consultar"']};
+
+    // Alto de fila según el texto
+    const lines = (s, w)=> s.split("\n").reduce((a,p)=>a+Math.max(1, Math.ceil(p.length/w)), 0);
+    let hPt = Math.max(22, Math.max(lines(it.detalle.trim()||" ", 48), lines(nota||" ", 30), lines(it.tipos.join(", ")||" ", 20)) * 15 + 8);
+
+    if(it.ref){
+      const box = refPx - PAD*2;
+      let w = box, h = box * it.ref.h / it.ref.w;
+      if(h > MAXH){ h = MAXH; w = MAXH * it.ref.w / it.ref.h; }
+      w = Math.round(w); h = Math.round(h);
+      hPt = Math.max(hPt, (h + PAD*2) * 0.75);
+      const offX = Math.round((refPx - w)/2);
+      const imgId = wb.addImage({base64: it.ref.data.split(",")[1], extension:"jpeg"});
+      ws.addImage(imgId, {
+        tl:{nativeCol:4, nativeColOff:offX*EMU, nativeRow:r-1, nativeRowOff:PAD*EMU},
+        br:{nativeCol:4, nativeColOff:(offX+w)*EMU, nativeRow:r-1, nativeRowOff:(PAD+h)*EMU},
+        editAs:"twoCell"   // se mueve y cambia de tamaño con la celda
+      });
+    }
+    row.height = Math.round(hPt);
+  });
+  ws.headerFooter.oddFooter = "&L&8Pedido de retoque&R&8Página &P de &N";
+  return wb.xlsx.writeBuffer();
+}
+
+/* ---------- Terminar / entregar ---------- */
+const slug = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_|_$/g,"").slice(0,40);
+const dlCap = (window.claude && typeof window.claude.use === "function") ? window.claude.use("downloads").catch(()=>null) : Promise.resolve(null);
+
+function msg(t, kind){ const m=$("#pMsg"); m.textContent=t; m.className="msg"+(kind?" "+kind:""); }
+
+$("#finishBtn").addEventListener("click", async ()=>{
+  const items = validate(); if(!items) return;
+  if(typeof ExcelJS === "undefined"){ alertBar("No se pudo cargar el generador de planillas. Revisa tu conexión a internet y vuelve a intentar."); return; }
+  const btn = $("#finishBtn"); btn.disabled = true; btn.textContent = "Armando planilla…";
+  try{
+    const buf = await buildWorkbook(items);
+    const d = new Date(); const ymd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    const filename = `Retoque_${slug(state.cliente) || "pedido"}_${ymd}.xlsx`;
+    built = {blob: new Blob([buf], {type:XLSX_MIME}), filename};
+    const fotos = new Set(items.map(i=>i.archivo.trim().toUpperCase())).size;
+    const refs = items.filter(i=>i.ref).length;
+    $("#pSummary").textContent = `${items.length} ${items.length===1?"cambio":"cambios"} en ${fotos} ${fotos===1?"foto":"fotos"}` + (refs ? `, ${refs} con imagen de referencia.` : ".");
+    $("#pFile").textContent = filename;
+    msg("");
+    const cap = await dlCap;
+    let canShare = false;
+    if(!cap && isTouch && navigator.canShare){
+      try{ canShare = navigator.canShare({files:[new File([built.blob], filename, {type:XLSX_MIME})]}); }catch(e){}
+    }
+    $("#shareBtn").hidden = !canShare;
+    $("#dlBtn").className = canShare ? "ghost" : "primary";
+    if(CONFIG.contacto){ const c=$("#pContact"); c.hidden=false; c.innerHTML = `Enviar a: <code>${esc(CONFIG.contacto)}</code> <button type="button" class="mini" id="copyC">Copiar</button>`; }
+    $("#overlay").hidden = false;
+    (canShare ? $("#shareBtn") : $("#dlBtn")).focus();
+  }catch(e){
+    alertBar("No se pudo armar la planilla. Intenta de nuevo.");
+  }finally{ btn.disabled=false; btn.textContent="Terminar pedido"; }
+});
+
+function alertBar(t){ $("#savedNote").textContent = t; $("#savedNote").style.color = "var(--pencil)"; setTimeout(()=>{ $("#savedNote").style.color=""; }, 6000); }
+
+$("#shareBtn").addEventListener("click", async ()=>{
+  try{
+    await navigator.share({files:[new File([built.blob], built.filename, {type:XLSX_MIME})], title:"Pedido de retoque"});
+    msg("Enviado. ¡Gracias!", "good");
+  }catch(e){ if(e.name!=="AbortError") msg("No se pudo abrir el menú de envío. Usa “Descargar planilla Excel”.", "bad"); }
+});
+
+$("#dlBtn").addEventListener("click", async ()=>{
+  const cap = await dlCap;
+  if(cap){
+    try{ await cap.save({filename: built.filename, data: built.blob}); msg("Planilla descargada. Ahora envíala a tu fotógrafo.", "good"); }
+    catch(e){ msg(e && e.code==="declined" ? "No se descargó." : "La descarga no está disponible en esta vista.", "bad"); }
+    return;
+  }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(built.blob); a.download = built.filename;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  msg("Planilla descargada. Búscala en tus Descargas y envíala a tu fotógrafo.", "good");
+});
+
+$("#pContact").addEventListener("click", async e=>{
+  if(e.target.id!=="copyC") return;
+  try{ await navigator.clipboard.writeText(CONFIG.contacto); e.target.textContent="Copiado"; }
+  catch(_){ const r=document.createRange(); r.selectNodeContents($("#pContact code")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); }
+});
+
+$("#backBtn").addEventListener("click", ()=>{ $("#overlay").hidden = true; });
+$("#overlay").addEventListener("click", e=>{ if(e.target.id==="overlay") $("#overlay").hidden = true; });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") $("#overlay").hidden = true; });
+$("#resetBtn").addEventListener("click", e=>{
+  const b = e.currentTarget;
+  if(!b.classList.contains("armed")){ b.classList.add("armed"); b.textContent="¿Borrar todo y empezar de cero? Toca de nuevo"; setTimeout(()=>{ b.classList.remove("armed"); b.textContent="Empezar un pedido nuevo"; },4000); return; }
+  state = {cliente:"", sesion:"", items:[blank()]}; try{ localStorage.removeItem(KEY); }catch(_){}
+  $("#cliente").value=""; $("#sesion").value=""; $("#overlay").hidden = true; b.classList.remove("armed"); b.textContent="Empezar un pedido nuevo";
+  render(); $("#savedNote").textContent="";
+});
+
+/* ---------- Inicio ---------- */
+load();
+$("#cliente").value = state.cliente || "";
+$("#sesion").value = state.sesion || "";
+render();
+</script>
+
+</body>
+</html>
